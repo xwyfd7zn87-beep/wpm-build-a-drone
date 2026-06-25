@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Your Drone — WPM Management Systems</title>
+<!--
+  WPM MANAGEMENT SYSTEMS — Drone & Robotics Configurator
+  Standalone build, derived from OrbitWorks Aerospace's build-a-drone.html
+  configurator. Rebranded for WPM; OrbitWorks credited as parts supplier
+  in the footer per the affiliation language drafted in
+  data/wpm-affiliation-blurb.md (Option 1 / short form).
+
+  NOTE ON ORDER EMAIL: the "Send Order" mailto target below is set to
+  wpmsystems@gmail.com as a DEFAULT placeholder. This has not been
+  confirmed as the permanent order-intake address — flag for review
+  before treating this as final.
+
+  Intended for embedding via <iframe> into the WPM Shopify site's
+  Robotics & Electronics section, so this page intentionally has no
+  site nav, cart, or checkout — just the configurator, a minimal
+  header, and a credit footer.
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  /* dark blueprint base */
+  --bg:      #050b14;
+  --bg2:     #0a1420;
+  --bg3:     #0f1d2e;
+  --bg4:     #16283d;
+
+  /* T-Mobile-bold accent */
+  --accent:  #E20074;
+  --accent2: #ff1a8c;
+  --adim:    rgba(226,0,116,0.16);
+  --adim2:   rgba(226,0,116,0.08);
+
+  /* military accent (olive / khaki) */
+  --military:  #8a9a5b;
+  --military2: #c2b280;
+  --mdim:      rgba(138,154,91,0.16);
+
+  --border:  rgba(140,170,210,0.10);
+  --border2: rgba(140,170,210,0.22);
+  --text:    #eef3f8;
+  --text2:   #8fa0b8;
+  --text3:   #51647a;
+  --success: #4ade80;
+  --warning: #f5b942;
+  --danger:  #ef4444;
+  --purple:  #c2b280;
+  --mono:    'Space Mono', monospace;
+  --sans:    'Montserrat', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+  background-image:
+    linear-gradient(rgba(140,170,210,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140,170,210,0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+a:hover { opacity: 0.8; }
+img { max-width: 100%; display: block; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── HEADER (minimal — no site nav, just brand + tag) ─────────────────── */
+.wpm-header {
+  position: sticky; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(5,11,20,0.94);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid var(--accent);
+}
+.wpm-header-inner {
+  max-width: 1140px; margin: 0 auto; padding: 0 24px;
+  height: 64px; display: flex; align-items: center; gap: 14px;
+}
+.wpm-brand { display: flex; align-items: center; gap: 10px; }
+.wpm-brand-mark {
+  background: var(--accent); color: #fff;
+  font-family: var(--sans); font-weight: 900; font-size: 14px;
+  letter-spacing: 0.03em;
+  padding: 6px 10px;
+  border-radius: 5px;
+  line-height: 1;
+}
+.wpm-brand-name {
+  font-family: var(--sans); font-weight: 800; font-size: 15px;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--text);
+  white-space: nowrap;
+}
+.wpm-header-tag {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--military2);
+  border: 1px solid var(--mdim); background: var(--mdim);
+  padding: 6px 12px; border-radius: 5px; white-space: nowrap;
+}
+@media (max-width:560px){ .wpm-header-tag{ display:none; } }
+
+/* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+.page-wrap { min-height: 100vh; position: relative; }
+.container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+.eyebrow {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em;
+  color: var(--accent); text-transform: uppercase; margin-bottom: 12px;
+}
+h1, h2, h3, h4 { font-weight: 700; line-height: 1.2; color: var(--text); }
+h1 { font-family: var(--sans); font-weight: 800; font-size: clamp(2rem, 5vw, 3.4rem); }
+h2 { font-family: var(--sans); font-weight: 800; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1rem; }
+.lead { font-size: 1.1rem; color: var(--text2); line-height: 1.7; }
+.text-muted { color: var(--text2); }
+.mono { font-family: var(--mono); }
+
+/* ── BUTTONS ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 28px; font-size: 14px; font-weight: 700; cursor: pointer;
+  border: 1px solid var(--border2); background: var(--bg3); color: var(--text);
+  transition: all 0.15s; font-family: var(--sans); text-decoration: none;
+  border-radius: 8px; position: relative;
+}
+.btn:hover { background: var(--bg4); opacity: 1; transform: translateY(-1px); }
+.btn-primary { background: var(--adim); color: var(--accent2); border-color: rgba(226,0,116,0.35); }
+.btn-primary:hover { background: rgba(226,0,116,0.24); }
+
+/* ── NOTIFICATION TOAST ─────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px;
+  padding: 14px 18px; font-size: 13px; color: var(--text); z-index: 400;
+  transform: translateY(20px); opacity: 0; transition: all 0.3s;
+  max-width: 280px; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-accent { border-left: 3px solid var(--accent); }
+
+/* ── FOOTER (minimal — affiliation credit only) ────────────────────────── */
+.wpm-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+  padding: 28px 0 36px;
+}
+.wpm-footer .container {
+  display: flex; flex-direction: column; gap: 10px;
+  align-items: center; text-align: center;
+}
+.wpm-footer-credit {
+  font-size: 12.5px; color: var(--text2); max-width: 640px; line-height: 1.6;
+}
+.wpm-footer-credit a { color: var(--military2); }
+.wpm-footer-copy {
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+}
+
+/* ── BUILD WIZARD (page-specific, ported from the original configurator) ── */
+.build-wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+.build-progress{display:flex;gap:0;margin:32px 0 40px;position:relative}
+.build-progress::before{content:'';position:absolute;top:18px;left:40px;right:40px;height:2px;background:var(--border2)}
+.build-step{flex:1;text-align:center;position:relative;cursor:pointer;opacity:.35;transition:opacity .3s}
+.build-step.active,.build-step.done{opacity:1}
+.build-step-dot{width:36px;height:36px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-family:var(--mono);font-size:13px;color:var(--text2);transition:all .3s;position:relative;z-index:2}
+.build-step.active .build-step-dot{border-color:var(--accent);color:var(--accent);background:var(--adim)}
+.build-step.done .build-step-dot{border-color:var(--success);color:var(--success);background:rgba(34,197,94,.12)}
+.build-step-label{font-size:11px;color:var(--text2);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+.build-stage{display:none;animation:fadeUp .35s ease}
+.build-stage.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.stage-header{margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.stage-header h2{font-size:22px;margin-bottom:4px}
+.stage-header p{color:var(--text2);font-size:14px}
+.option-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:28px}
+.option-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;cursor:pointer;transition:all .25s;position:relative}
+.option-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.option-card.selected{border-color:var(--accent);background:var(--adim2);box-shadow:0 0 0 1px var(--accent)}
+.option-card.disabled{opacity:.3;pointer-events:none}
+.option-card .card-tag{display:inline-block;font-family:var(--mono);font-size:10px;background:var(--adim);color:var(--accent2);padding:2px 8px;border-radius:4px;margin-bottom:6px;text-transform:uppercase}
+.option-card .card-tag.multi{background:var(--mdim);color:var(--military2)}
+.option-card h3{font-size:15px;margin-bottom:3px}
+.option-card .card-specs{font-size:12px;color:var(--text2);line-height:1.6;margin:6px 0 10px}
+.option-card .card-price{font-family:var(--mono);font-size:17px;color:var(--success)}
+.option-card .card-check{position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.option-card.selected .card-check{border-color:var(--accent);background:var(--accent);color:#fff}
+.option-card .card-qty{display:flex;align-items:center;gap:6px;margin-top:8px}
+.option-card .card-qty button{width:26px;height:26px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.option-card .card-qty button:hover{border-color:var(--accent)}
+.option-card .card-qty button.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.option-card .card-qty span{font-family:var(--mono);font-size:13px;min-width:20px;text-align:center}
+.cat-label{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.cat-label .sel-mode{font-size:10px;color:var(--military2);text-transform:none;letter-spacing:0;margin-left:8px}
+.build-bar{position:sticky;bottom:0;left:0;right:0;z-index:50;background:rgba(5,11,20,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:16px 0}
+.build-bar-inner{max-width:1100px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.build-bar .running-total{font-family:var(--mono);font-size:20px;color:var(--success)}
+.build-bar .running-total small{font-size:12px;color:var(--text2);display:block}
+.build-bar-btns{display:flex;gap:10px}
+.summary-table{width:100%;border-collapse:collapse;margin:16px 0 24px}
+.summary-table th,.summary-table td{text-align:left;padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border)}
+.summary-table th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--text2);letter-spacing:.5px}
+.summary-table .total-row td{font-family:var(--mono);font-size:16px;color:var(--success);border-top:2px solid var(--accent);font-weight:700}
+.order-confirm{background:var(--bg2);border:1px solid var(--success);border-radius:12px;padding:40px;text-align:center;max-width:600px;margin:40px auto}
+.order-confirm h2{color:var(--success);margin-bottom:12px}
+.order-confirm p{color:var(--text2);font-size:14px;line-height:1.7}
+@media(max-width:640px){.option-grid{grid-template-columns:1fr}.build-progress{overflow-x:auto;padding-bottom:8px}.build-step-label{font-size:9px}}
+</style>
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WPM Management Systems">
+<meta property="og:title" content="Build Your Drone — WPM Management Systems">
+<meta property="og:description" content="Configure a custom drone platform with domestically sourced components. Fixed-wing, multirotor, and VTOL options.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+<header class="wpm-header">
+  <div class="wpm-header-inner">
+    <div class="wpm-brand">
+      <span class="wpm-brand-mark">WPM</span>
+      <span class="wpm-brand-name">Management Systems</span>
+    </div>
+    <div class="wpm-header-tag">Drone &amp; Robotics Configurator</div>
+  </div>
+</header>
+<div class="page-wrap">
+  <section style="padding:48px 0 24px">
+    <div class="build-wrap">
+      <div class="eyebrow">WPM Custom Drone Lab</div>
+      <h1>Build Your Drone</h1>
+      <p class="lead" style="margin-top:8px;max-width:660px">Pick your airframe. Choose your electronics. Add accessories. Our team builds, tests, and ships your custom configuration &mdash; every component domestically sourced, zero Chinese-origin parts.</p>
+    </div>
+  </section>
+  <div class="build-wrap">
+    <div class="build-progress" id="progressBar">
+      <div class="build-step active" onclick="goStage(0)"><div class="build-step-dot">1</div><div class="build-step-label">Airframe</div></div>
+      <div class="build-step" onclick="goStage(1)"><div class="build-step-dot">2</div><div class="build-step-label">Electronics</div></div>
+      <div class="build-step" onclick="goStage(2)"><div class="build-step-dot">3</div><div class="build-step-label">FPV / Camera</div></div>
+      <div class="build-step" onclick="goStage(3)"><div class="build-step-dot">4</div><div class="build-step-label">Power / Payload</div></div>
+      <div class="build-step" onclick="goStage(4)"><div class="build-step-dot">5</div><div class="build-step-label">Accessories</div></div>
+      <div class="build-step" onclick="goStage(5)"><div class="build-step-dot">6</div><div class="build-step-label">Review</div></div>
+    </div>
+  </div>
+  <div class="build-wrap" id="stageContainer">
+    <div class="build-stage active" id="stage0"><div class="stage-header"><h2>Choose Your Airframe</h2><p>3D-printed fixed wings (foaming PLA, painted, VTOL-ready) or carbon fiber multirotor frames. Pick one.</p></div><div class="cat-label">Fixed Wing &mdash; 3D-Printed Airframes <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_fw"></div><div class="cat-label">Multirotor Frames &mdash; Carbon Fiber <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_mr"></div></div>
+    <div class="build-stage" id="stage1"><div class="stage-header"><h2>Flight Electronics</h2><p>Flight controller, ESC, motors, GPS, receiver, and servos. Options filter by your airframe.</p></div><div class="cat-label">Flight Controller <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_fc"></div><div class="cat-label">ESC <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_esc"></div><div class="cat-label" id="lbl_motor">Motors <span class="sel-mode">Select one (auto-qty by airframe)</span></div><div class="option-grid" id="grid_motor"></div><div class="cat-label">GPS Module <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_gps"></div><div class="cat-label">Receiver <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_rx"></div><div class="cat-label" id="lbl_servo" style="display:none">Servos (Fixed Wing) <span class="sel-mode">Select one set</span></div><div class="option-grid" id="grid_servo"></div></div>
+    <div class="build-stage" id="stage2"><div class="stage-header"><h2>FPV &amp; Camera Systems</h2><p>Digital FPV, analog backup, action cameras, and gimbals. You can select multiple camera/gimbal options.</p></div><div class="cat-label">FPV System <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_fpv"></div><div class="cat-label">Camera / Gimbal <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_cam"></div></div>
+    <div class="build-stage" id="stage3"><div class="stage-header"><h2>Battery &amp; Payload</h2><p>Power system, cargo drops, winches. You can combine multiple payload mechanisms.</p></div><div class="cat-label">Battery <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_batt"></div><div class="cat-label">Cargo / Payload Mechanisms <span class="sel-mode">Select multiple &mdash; mix and match</span></div><div class="option-grid" id="grid_cargo"></div><div class="cat-label" id="lbl_vtol" style="display:none">VTOL Conversion <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_vtol"></div></div>
+    <div class="build-stage" id="stage4"><div class="stage-header"><h2>Accessories &amp; Ground Support</h2><p>Everything from launch systems to transport cases. Select as many as you need.</p></div><div class="cat-label">Launch &amp; Recovery <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_launch"></div><div class="cat-label">Transport &amp; Protection <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_transport"></div><div class="cat-label">Ground Station &amp; Range <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_ground"></div><div class="cat-label">Field Accessories <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_field"></div></div>
+    <div class="build-stage" id="stage5"><div class="stage-header"><h2>Review Your Build</h2><p>Double-check everything. Hit "Send Order" and our team contacts you within 24 hours to arrange payment and schedule assembly.</p></div><table class="summary-table" id="summaryTable"><thead><tr><th>Component</th><th>Selection</th><th>Qty</th><th>Price</th></tr></thead><tbody id="summaryBody"></tbody></table><div style="margin:24px 0"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Name</label><input type="text" id="custName" placeholder="Your full name" style="width:100%;max-width:400px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px"></div><div style="margin-bottom:24px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Email</label><input type="email" id="custEmail" placeholder="you@example.com" style="width:100%;max-width:400px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px"></div><div style="margin-bottom:24px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Notes (optional)</label><textarea id="custNotes" rows="3" placeholder="Special requests, paint color, mission details..." style="width:100%;max-width:400px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;resize:vertical"></textarea></div></div>
+    <div class="order-confirm" id="orderConfirm" style="display:none"><div style="font-size:48px;margin-bottom:12px">&#9993;</div><h2>Order Received</h2><p>Your custom build request has been sent to <strong>wpmsystems@gmail.com</strong>.</p><p style="margin-top:16px">A WPM Management Systems team member will contact you within <strong>24 hours</strong> to confirm specs, arrange payment, and schedule your build.</p><p style="margin-top:16px;font-size:12px;color:var(--text3)">No payment is taken until you speak with our team. Builds typically ship 2&ndash;4 weeks after payment.</p><button class="btn btn-primary" style="margin-top:24px" onclick="location.reload()">Start a New Build</button></div>
+  </div>
+  <div class="build-bar" id="buildBar">
+    <div class="build-bar-inner">
+      <div class="running-total"><small>Estimated Total</small>$<span id="runTotal">0.00</span></div>
+      <div class="build-bar-btns">
+        <button class="btn" id="btnPrev" onclick="prevStage()" style="display:none">&larr; Back</button>
+        <button class="btn btn-primary" id="btnNext" onclick="nextStage()">Next: Electronics &rarr;</button>
+        <button class="btn btn-primary" id="btnOrder" onclick="sendOrder()" style="display:none">Send Order &rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+<footer class="wpm-footer">
+  <div class="container">
+    <div class="wpm-footer-credit">Drone and robotics equipment supplied by <a href="https://orbitworksaerospace.com" target="_blank" rel="noopener">OrbitWorks Aerospace</a>, a Binghamton, NY-based aerospace and drone technology company.</div>
+    <div class="wpm-footer-copy">&copy; <span id="yr"></span> WPM Management Systems &middot; All estimates subject to confirmation</div>
+  </div>
+</footer>
+<div class="toast toast-accent" id="toast"></div>
+<script>
+(function(){
+'use strict';
+
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+function showToast(msg, duration){
+  duration = duration || 3000;
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._wpmToastTimer);
+  window._wpmToastTimer = setTimeout(()=>t.classList.remove('show'), duration);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT DATABASE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*  Selection modes:
+    'single'  — only one item per category (radio-style)
+    'multi'   — multiple items, each with qty (checkbox + qty)
+    Auto-qty: motors/ESCs multiply by motorCount() automatically
+*/
+
+/*  The component database lives in data/drone-inventory.json — a clean,
+    standalone export of this configurator's buildable parts (~118 items
+    across 17 categories), originally extracted from OrbitWorks Aerospace's
+    build-a-drone configurator. CAT is fetched once at startup and populated
+    before the wizard's first render (see loadInventory() and the bootstrap
+    call at the bottom of this script). */
+let CAT = null;
+
+async function loadInventory(){
+  const res = await fetch('data/drone-inventory.json');
+  if(!res.ok) throw new Error('Inventory fetch failed: HTTP '+res.status);
+  const data = await res.json();
+  CAT = data.categories;
+}
+
+/* ── STATE ──────────────────────────────────────────────────────────────── */
+let stage = 0;
+const STAGES = 6;
+const sel = {};        // single selections: sel.fc = item
+const multi = {};      // multi selections:  multi.cam = [{item,qty},...]
+let battQty = 1;       // battery quantity (1, 2, 3, or 5)
+const nextLabels = ['Next: Electronics','Next: FPV & Camera','Next: Power & Payload','Next: Accessories','Next: Review',''];
+
+/* ── HELPERS ────────────────────────────────────────────────────────────── */
+function afType(){ return sel.fw?'fw':sel.mr?'mr':null }
+function afCompat(){ return sel.fw?.compat||sel.mr?.compat||null }
+function motorN(){
+  if(sel.fw) return 1;
+  return sel.mr?.motors||4;
+}
+function fwSize(){
+  const c=sel.fw?.compat;
+  if(c==='micro'||c==='small') return 'fw-s';
+  if(c==='medium') return 'fw-m';
+  if(c==='large') return 'fw-l';
+  return null;
+}
+
+/* ── CARD HTML ──────────────────────────────────────────────────────────── */
+function card(p, catKey){
+  const mode = CAT[catKey].mode;
+  const isSel = mode==='single' ? sel[catKey]?.id===p.id : (multi[catKey]||[]).some(x=>x.id===p.id);
+  const dis = p._dis?' disabled':'';
+  const specs = [p.ws&&'Wingspan: '+p.ws, p.size&&'Size: '+p.size, p.kv&&'KV: '+p.kv, p.motors&&'Motors: '+p.motors].filter(Boolean).join(' · ');
+  const mItem = mode==='multi'?(multi[catKey]||[]).find(x=>x.id===p.id):null;
+  const qty = mItem?mItem.qty:1;
+
+  return `<div class="option-card${isSel?' selected':''}${dis}" data-cat="${catKey}" data-id="${p.id}" onclick="pick('${catKey}','${p.id}')">
+    <div class="card-check">${isSel?'&#10003;':''}</div>
+    ${p.tag?'<span class="card-tag">'+p.tag+'</span>':''}
+    ${mode==='multi'&&p.price>0?'<span class="card-tag multi">Multi</span>':''}
+    <h3>${p.name}</h3>
+    <div class="card-specs">${specs?specs+'<br>':''}${p.desc}</div>
+    <div class="card-price">${p.price>0?'$'+p.price.toFixed(2):'Included'}</div>
+    ${p.vtol?'<div style="font-size:11px;color:var(--military2);margin-top:4px">VTOL conversion available</div>':''}
+    ${p.perMotor?'<div style="font-size:11px;color:var(--text2);margin-top:3px">Price per unit &middot; auto-qty by airframe</div>':''}
+    ${mode==='multi'&&isSel&&p.price>0?`<div class="card-qty"><button onclick="event.stopPropagation();adjQty('${catKey}','${p.id}',-1)">−</button><span>${qty}</span><button onclick="event.stopPropagation();adjQty('${catKey}','${p.id}',1)">+</button></div>`:''}
+    ${catKey==='batt'&&isSel&&p.price>0?`<div class="card-qty" style="margin-top:8px;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:var(--text2);width:100%;text-align:center;margin-bottom:2px">Qty:</span><button onclick="event.stopPropagation();setBattQty(1)" class="${battQty===1?'active':''}">1x</button><button onclick="event.stopPropagation();setBattQty(2)" class="${battQty===2?'active':''}">2x</button><button onclick="event.stopPropagation();setBattQty(3)" class="${battQty===3?'active':''}">3x</button><button onclick="event.stopPropagation();setBattQty(5)" class="${battQty===5?'active':''}">5x</button></div>`:''}
+  </div>`;
+}
+
+function renderGrid(gridId, items, catKey){
+  document.getElementById(gridId).innerHTML = items.map(p=>card(p,catKey)).join('');
+}
+
+/* ── PICK (single) ──────────────────────────────────────────────────────── */
+window.pick = function(catKey, id){
+  const cat = CAT[catKey];
+  const item = cat.items.find(p=>p.id===id);
+  if(!item||item._dis) return;
+
+  if(cat.mode==='single'){
+    // Airframe mutual exclusion
+    if(catKey==='fw'&&sel.mr){ delete sel.mr; delete sel.fc; delete sel.esc; delete sel.motor; delete sel.servo; }
+    if(catKey==='mr'&&sel.fw){ delete sel.fw; delete sel.fc; delete sel.esc; delete sel.motor; delete sel.servo; }
+    if((catKey==='fw'||catKey==='mr')&&sel[catKey]?.id!==id){ delete sel.fc; delete sel.esc; delete sel.motor; delete sel.servo; }
+    sel[catKey] = sel[catKey]?.id===id ? undefined : item;
+    if(!sel[catKey]){ delete sel[catKey]; if(catKey==='batt') battQty=1; }
+  } else {
+    // Multi-select toggle
+    if(!multi[catKey]) multi[catKey]=[];
+    const idx = multi[catKey].findIndex(x=>x.id===id);
+    if(idx>=0){ multi[catKey].splice(idx,1); }
+    else { multi[catKey].push({...item,qty:1}); }
+    // remove "none" items if selecting real item, or clear others if selecting none
+    if(item.price===0){ multi[catKey]=[{...item,qty:1}]; }
+    else { multi[catKey]=multi[catKey].filter(x=>x.price>0); }
+  }
+  renderStage();
+  total();
+};
+
+/* ── QTY ADJUST (multi) ─────────────────────────────────────────────────── */
+window.adjQty = function(catKey, id, delta){
+  const arr = multi[catKey]||[];
+  const it = arr.find(x=>x.id===id);
+  if(!it) return;
+  it.qty = Math.max(1, Math.min(20, it.qty+delta));
+  renderStage();
+  total();
+};
+
+/* ── BATTERY QTY ───────────────────────────────────────────────────────── */
+window.setBattQty = function(n){
+  battQty = n;
+  renderStage();
+  total();
+};
+
+/* ── COMPATIBILITY FILTERS ──────────────────────────────────────────────── */
+function filterFC(){
+  const t=afType();
+  return CAT.fc.items.map(f=>({...f, _dis: t&&f.fit!=='all'&&f.fit!==t }));
+}
+function filterESC(){
+  const t=afType();
+  return CAT.esc.items.map(e=>({...e, _dis: t&&e.fit!=='all'&&e.fit!==t }));
+}
+function filterMotors(){
+  const t=afType(), c=afCompat(), fs=fwSize();
+  return CAT.motor.items.map(m=>{
+    let ok=true;
+    if(t==='fw') ok=m.forFrame.some(f=>f.startsWith('fw'))&&(m.forFrame.includes(fs)||m.forFrame.includes('fw-m')&&fs==='fw-l');
+    else if(t==='mr') ok=m.forFrame.includes(c);
+    else ok=true;
+    return {...m, _dis:!ok};
+  });
+}
+
+/* ── RENDER STAGE ───────────────────────────────────────────────────────── */
+function renderStage(){
+  if(stage===0){
+    renderGrid('grid_fw',CAT.fw.items,'fw');
+    renderGrid('grid_mr',CAT.mr.items,'mr');
+  }
+  if(stage===1){
+    renderGrid('grid_fc',filterFC(),'fc');
+    renderGrid('grid_esc',filterESC(),'esc');
+    renderGrid('grid_motor',filterMotors(),'motor');
+    renderGrid('grid_gps',CAT.gps.items,'gps');
+    renderGrid('grid_rx',CAT.rx.items,'rx');
+    const isFW=afType()==='fw';
+    document.getElementById('lbl_servo').style.display=isFW?'':'none';
+    document.getElementById('grid_servo').innerHTML=isFW?CAT.servo.items.map(p=>card(p,'servo')).join(''):'';
+  }
+  if(stage===2){
+    renderGrid('grid_fpv',CAT.fpv.items,'fpv');
+    renderGrid('grid_cam',CAT.cam.items,'cam');
+  }
+  if(stage===3){
+    renderGrid('grid_batt',CAT.batt.items,'batt');
+    renderGrid('grid_cargo',CAT.cargo.items,'cargo');
+    const showV=sel.fw?.vtol;
+    document.getElementById('lbl_vtol').style.display=showV?'':'none';
+    document.getElementById('grid_vtol').innerHTML=showV?CAT.vtol.items.map(p=>card(p,'vtol')).join(''):'';
+  }
+  if(stage===4){
+    renderGrid('grid_launch',CAT.launch.items,'launch');
+    renderGrid('grid_transport',CAT.transport.items,'transport');
+    renderGrid('grid_ground',CAT.ground.items,'ground');
+    renderGrid('grid_field',CAT.field.items,'field');
+  }
+  if(stage===5) renderSummary();
+}
+
+/* ── PRICING CONSTANTS ─────────────────────────────────────────────────── */
+const LABOR_PCT = 0.30;        // 30% of parts subtotal
+const LABOR_MIN = 99.00;       // $99 minimum
+const NYS_TAX   = 0.08;        // 8% Broome County, NY (4% state + 4% county)
+
+/* ── PARTS SUBTOTAL HELPER ─────────────────────────────────────────────── */
+function partsSubtotal(){
+  let p=0;
+  ['fw','mr','fc','esc','batt','fpv','vtol','gps','rx','servo'].forEach(k=>{
+    if(!sel[k]) return;
+    let q=1;
+    if(k==='motor') q=motorN();
+    if(k==='esc'&&sel[k].perMotor) q=motorN();
+    if(k==='batt') q=battQty;
+    p+=sel[k].price*q;
+  });
+  if(sel.motor) p+=sel.motor.price*motorN();
+  ['cam','cargo','launch','transport','ground','field'].forEach(k=>{
+    (multi[k]||[]).forEach(x=>{ p+=x.price*x.qty; });
+  });
+  return p;
+}
+function laborFee(parts){ return Math.max(LABOR_MIN, +(parts*LABOR_PCT).toFixed(2)); }
+
+/* ── TOTAL ──────────────────────────────────────────────────────────────── */
+function total(){
+  const parts = partsSubtotal();
+  const labor = laborFee(parts);
+  const taxable = parts + labor;
+  const tax = +(taxable * NYS_TAX).toFixed(2);
+  const t = taxable + tax;
+  document.getElementById('runTotal').textContent=t.toFixed(2);
+}
+
+/* ── SUMMARY ────────────────────────────────────────────────────────────── */
+function renderSummary(){
+  let rows='', parts=0;
+  const singles=[
+    ['fw','Airframe (Fixed Wing)'],['mr','Airframe (Multirotor)'],
+    ['fc','Flight Controller'],['esc','ESC'],['motor','Motor(s)'],
+    ['gps','GPS'],['rx','Receiver'],['servo','Servos'],
+    ['fpv','FPV System'],['batt','Battery'],['vtol','VTOL Kit']
+  ];
+  singles.forEach(([k,label])=>{
+    if(!sel[k]) return;
+    let q=1;
+    if(k==='motor') q=motorN();
+    if(k==='esc'&&sel[k].perMotor) q=motorN();
+    if(k==='batt') q=battQty;
+    const line=sel[k].price*q;
+    parts+=line;
+    rows+=`<tr><td>${label}</td><td>${sel[k].name}</td><td style="font-family:var(--mono)">${q}</td><td style="font-family:var(--mono)">$${line.toFixed(2)}</td></tr>`;
+  });
+  const multis=[
+    ['cam','Camera / Gimbal'],['cargo','Cargo / Payload'],
+    ['launch','Launch & Recovery'],['transport','Transport & Protection'],
+    ['ground','Ground Station & Range'],['field','Field Accessories']
+  ];
+  multis.forEach(([k,label])=>{
+    (multi[k]||[]).forEach(x=>{
+      if(x.price===0) return;
+      const line=x.price*x.qty;
+      parts+=line;
+      rows+=`<tr><td>${label}</td><td>${x.name}</td><td style="font-family:var(--mono)">${x.qty}</td><td style="font-family:var(--mono)">$${line.toFixed(2)}</td></tr>`;
+    });
+  });
+  // Parts subtotal
+  rows+=`<tr style="border-top:2px solid var(--border2)"><td colspan="3" style="color:var(--text2)">Parts Subtotal</td><td style="font-family:var(--mono)">$${parts.toFixed(2)}</td></tr>`;
+  // Labor & testing (30% of parts, $99 min)
+  const labor = laborFee(parts);
+  rows+=`<tr><td>Labor &amp; Testing</td><td style="color:var(--text2);font-size:12px">Assembly, firmware, calibration, test flight (30% of parts, $99 min)</td><td style="font-family:var(--mono)">1</td><td style="font-family:var(--mono)">$${labor.toFixed(2)}</td></tr>`;
+  // NYS sales tax
+  const taxable = parts + labor;
+  const tax = +(taxable * NYS_TAX).toFixed(2);
+  rows+=`<tr><td>NYS Sales Tax</td><td style="color:var(--text2);font-size:12px">Broome County, NY &mdash; 8%</td><td style="font-family:var(--mono)">&mdash;</td><td style="font-family:var(--mono)">$${tax.toFixed(2)}</td></tr>`;
+  // Total
+  const grand = taxable + tax;
+  rows+=`<tr class="total-row"><td colspan="3">ESTIMATED TOTAL</td><td>$${grand.toFixed(2)}</td></tr>`;
+  document.getElementById('summaryBody').innerHTML=rows;
+}
+
+/* ── NAVIGATION ─────────────────────────────────────────────────────────── */
+window.goStage=function(n){ if(n<=stage+1) setStage(n); };
+window.nextStage=function(){ if(stage<STAGES-1) setStage(stage+1); };
+window.prevStage=function(){ if(stage>0) setStage(stage-1); };
+function setStage(n){
+  stage=n;
+  document.querySelectorAll('.build-stage').forEach((el,i)=>el.classList.toggle('active',i===n));
+  document.querySelectorAll('.build-step').forEach((el,i)=>{ el.classList.remove('active','done'); if(i<n)el.classList.add('done'); if(i===n)el.classList.add('active'); });
+  document.getElementById('btnPrev').style.display=n>0?'':'none';
+  document.getElementById('btnNext').style.display=n<STAGES-1?'':'none';
+  document.getElementById('btnOrder').style.display=n===STAGES-1?'':'none';
+  if(n<STAGES-1) document.getElementById('btnNext').innerHTML=nextLabels[n]+' &rarr;';
+  renderStage(); total();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ── SEND ORDER ─────────────────────────────────────────────────────────── */
+/* DEFAULT/UNCONFIRMED: order emails to wpmsystems@gmail.com. Swap this
+   address if Mista wants a different dedicated order-intake inbox. */
+window.sendOrder=function(){
+  const name=document.getElementById('custName').value.trim();
+  const email=document.getElementById('custEmail').value.trim();
+  const notes=document.getElementById('custNotes').value.trim();
+  if(!name||!email){ showToast('Please enter your name and email.'); return; }
+  let lines=['=== WPM CUSTOM DRONE BUILD ORDER ===','Date: '+new Date().toLocaleDateString(),'Customer: '+name,'Email: '+email];
+  if(notes) lines.push('Notes: '+notes);
+  lines.push('','--- CONFIGURATION ---');
+  let parts=0;
+  const singles=[['fw','Airframe (FW)'],['mr','Airframe (MR)'],['fc','FC'],['esc','ESC'],['motor','Motors'],['gps','GPS'],['rx','Receiver'],['servo','Servos'],['fpv','FPV'],['batt','Battery'],['vtol','VTOL']];
+  singles.forEach(([k,label])=>{
+    if(!sel[k]) return;
+    let q=1; if(k==='motor')q=motorN(); if(k==='esc'&&sel[k].perMotor)q=motorN(); if(k==='batt')q=battQty;
+    const line=sel[k].price*q; parts+=line;
+    lines.push(`${label}: ${sel[k].name} x${q} — $${line.toFixed(2)}`);
+  });
+  const multis=[['cam','Camera'],['cargo','Cargo'],['launch','Launch/Recovery'],['transport','Transport'],['ground','Ground Station'],['field','Field Accessory']];
+  multis.forEach(([k,label])=>{
+    (multi[k]||[]).forEach(x=>{ if(x.price===0)return; const line=x.price*x.qty; parts+=line; lines.push(`${label}: ${x.name} x${x.qty} — $${line.toFixed(2)}`); });
+  });
+  const labor = laborFee(parts);
+  const taxable = parts + labor;
+  const tax = +(taxable * NYS_TAX).toFixed(2);
+  const grand = taxable + tax;
+  lines.push('','Parts Subtotal: $'+parts.toFixed(2));
+  lines.push(`Labor & Testing (30% of parts, $99 min): $${labor.toFixed(2)}`);
+  lines.push(`NYS Sales Tax (8%): $${tax.toFixed(2)}`);
+  lines.push('','ESTIMATED TOTAL: $'+grand.toFixed(2));
+  const subject=encodeURIComponent('Custom Drone Build Order — '+name);
+  window.location.href='mailto:wpmsystems@gmail.com?subject='+subject+'&body='+encodeURIComponent(lines.join('\n'));
+  document.getElementById('stageContainer').style.display='none';
+  document.getElementById('buildBar').style.display='none';
+  document.getElementById('progressBar').style.display='none';
+  document.getElementById('orderConfirm').style.display='';
+};
+
+(async function bootstrap(){
+  try{
+    await loadInventory();
+    renderStage(); total();
+  }catch(err){
+    console.error('Inventory load failed:', err);
+    const sc = document.getElementById('stageContainer');
+    if(sc) sc.innerHTML = '<p style="padding:2rem;text-align:center;color:#ff6b8a">Sorry — the configurator could not load its parts catalog right now. Please refresh the page or try again shortly.</p>';
+  }
+})();
+})();
+</script>
+</body>
+</html>
