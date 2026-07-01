@@ -695,9 +695,8 @@ window.submitEmailCapture=function(){
     },
     estimatedTotal:parseFloat(document.getElementById('runTotal').textContent)
   };
-  console.log('[WPM] Email capture submission:', buildSummary);
-  // TODO: wire to real endpoint — e.g.:
-  // fetch('/api/captures',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildSummary)})
+  // POST to Google Sheets via Apps Script web app (fire-and-forget)
+  try{fetch('https://script.google.com/macros/s/AKfycbw8GqJtV7-XFlcw4uUHlbU-8SJBNXqEz_gBRUkEWkmLw7mfCKAg3u6z-JBDnNondU-2/exec',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildSummary)}).catch(()=>{});}catch(e){}
   emailCaptured=true;
   const rn=document.getElementById('custName'); const re=document.getElementById('custEmail');
   if(rn&&!rn.value) rn.value=name; if(re&&!re.value) re.value=email;
