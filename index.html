@@ -218,6 +218,29 @@ h4 { font-size: 1rem; }
 .order-confirm h2{color:var(--success);margin-bottom:12px}
 .order-confirm p{color:var(--text2);font-size:14px;line-height:1.7}
 @media(max-width:640px){.option-grid{grid-template-columns:1fr}.build-progress{overflow-x:auto;padding-bottom:8px}.build-step-label{font-size:9px}}
+
+/* ── EMAIL CAPTURE MODAL ─────────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(5,11,20,.85);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:all .3s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal-box{background:var(--bg2);border:1px solid rgba(226,0,116,.35);border-radius:14px;padding:36px;max-width:440px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6);transform:translateY(20px);transition:transform .3s}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-box .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1}
+.modal-box .modal-close:hover{color:var(--text)}
+.modal-headline{font-family:var(--sans);font-weight:800;font-size:1.3rem;color:var(--text);margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.6}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono)}
+.modal-field input,.modal-field select{width:100%;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;font-family:var(--sans);transition:border-color .2s}
+.modal-field input:focus,.modal-field select:focus{outline:none;border-color:var(--accent)}
+.modal-field select option{background:var(--bg3)}
+.modal-submit{width:100%;padding:13px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:var(--sans);font-weight:700;font-size:15px;cursor:pointer;margin-top:6px;transition:background .2s}
+.modal-submit:hover{background:var(--accent2)}
+.modal-thankyou{text-align:center;display:none}
+.modal-thankyou .ty-icon{font-size:44px;margin-bottom:10px}
+.modal-thankyou h3{color:var(--success);margin-bottom:8px}
+.modal-thankyou p{font-size:13px;color:var(--text2);line-height:1.6}
+.modal-skip{display:block;text-align:center;margin-top:12px;font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline}
+.modal-skip:hover{color:var(--text2)}
 </style>
 <!-- Open Graph -->
 <meta property="og:type" content="website">
@@ -280,6 +303,45 @@ h4 { font-size: 1rem; }
     <div class="wpm-footer-copy">&copy; <span id="yr"></span> WPM Management Systems &middot; All estimates subject to confirmation</div>
   </div>
 </footer>
+<!-- Email Capture Modal -->
+<div class="modal-overlay" id="emailModal" aria-modal="true" role="dialog">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeEmailModal()" aria-label="Close">&times;</button>
+    <div id="modalForm">
+      <div class="eyebrow" style="margin-bottom:8px">Build Complete</div>
+      <div class="modal-headline">Save Your Build &amp; Get a Custom Quote</div>
+      <div class="modal-sub">Enter your info and we'll send your full parts list and a personalized quote to your inbox.</div>
+      <div class="modal-field">
+        <label for="captName">Name</label>
+        <input type="text" id="captName" placeholder="Your full name" autocomplete="name">
+      </div>
+      <div class="modal-field">
+        <label for="captEmail">Email <span style="color:var(--accent)">*</span></label>
+        <input type="email" id="captEmail" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="modal-field">
+        <label for="captOrg">Organization Type <span style="color:var(--text3)">(optional)</span></label>
+        <select id="captOrg">
+          <option value="">&#8212; Select one &#8212;</option>
+          <option value="Education">Education</option>
+          <option value="Search &amp; Rescue">Search &amp; Rescue</option>
+          <option value="Law Enforcement">Law Enforcement</option>
+          <option value="Commercial">Commercial</option>
+          <option value="Personal">Personal</option>
+        </select>
+      </div>
+      <button class="modal-submit" onclick="submitEmailCapture()">Send My Build Summary &rarr;</button>
+      <span class="modal-skip" onclick="closeEmailModal()">Skip for now &#8212; continue to review</span>
+    </div>
+    <div class="modal-thankyou" id="modalThankyou">
+      <div class="ty-icon">&#9993;</div>
+      <h3>You're on the list!</h3>
+      <p>We'll send your custom build summary to <strong id="tyEmail"></strong>.<br>A WPM specialist will follow up within 24 hours.</p>
+      <p style="margin-top:12px;font-size:12px;color:var(--text3)">You can still send your full order below after reviewing your build.</p>
+      <button class="btn btn-primary" style="margin-top:20px;width:100%;justify-content:center" onclick="closeEmailModal()">Continue to Review &rarr;</button>
+    </div>
+  </div>
+</div>
 <div class="toast toast-accent" id="toast"></div>
 <script>
 (function(){
@@ -328,6 +390,7 @@ const STAGES = 6;
 const sel = {};        // single selections: sel.fc = item
 const multi = {};      // multi selections:  multi.cam = [{item,qty},...]
 let battQty = 1;       // battery quantity (1, 2, 3, or 5)
+let emailCaptured = false; // true after email modal is submitted or skipped
 const nextLabels = ['Next: Electronics','Next: FPV & Camera','Next: Power & Payload','Next: Accessories','Next: Review',''];
 
 /* ── HELPERS ────────────────────────────────────────────────────────────── */
@@ -555,8 +618,8 @@ function renderSummary(){
 }
 
 /* ── NAVIGATION ─────────────────────────────────────────────────────────── */
-window.goStage=function(n){ if(n<=stage+1) setStage(n); };
-window.nextStage=function(){ if(stage<STAGES-1) setStage(stage+1); };
+window.goStage=function(n){ if(n<=stage+1){ if(n===5&&!emailCaptured&&isBuildMinimum()){showEmailModal();}else{setStage(n);} } };
+window.nextStage=function(){ if(stage<STAGES-1){ if(stage===4&&!emailCaptured&&isBuildMinimum()){showEmailModal();}else{setStage(stage+1);} } };
 window.prevStage=function(){ if(stage>0) setStage(stage-1); };
 function setStage(n){
   stage=n;
@@ -607,6 +670,40 @@ window.sendOrder=function(){
   document.getElementById('buildBar').style.display='none';
   document.getElementById('progressBar').style.display='none';
   document.getElementById('orderConfirm').style.display='';
+};
+
+/* ── EMAIL CAPTURE MODAL ─────────────────────────────────────────────────── */
+function isBuildMinimum(){ return !!(sel.fw||sel.mr)&&!!(sel.batt); }
+window.showEmailModal=function(){ document.getElementById('emailModal').classList.add('open'); };
+window.closeEmailModal=function(){
+  emailCaptured=true; // treat skip as "handled" — won't re-trigger
+  document.getElementById('emailModal').classList.remove('open');
+  setStage(5);
+};
+window.submitEmailCapture=function(){
+  const name=document.getElementById('captName').value.trim();
+  const email=document.getElementById('captEmail').value.trim();
+  const org=document.getElementById('captOrg').value;
+  if(!email){ showToast('Please enter your email address.'); return; }
+  const buildSummary={
+    timestamp:new Date().toISOString(), name, email, organization:org,
+    selections:{
+      airframe:sel.fw?.name||sel.mr?.name||null,
+      flightController:sel.fc?.name||null, esc:sel.esc?.name||null,
+      motor:sel.motor?.name||null, gps:sel.gps?.name||null,
+      receiver:sel.rx?.name||null, fpv:sel.fpv?.name||null, battery:sel.batt?.name||null
+    },
+    estimatedTotal:parseFloat(document.getElementById('runTotal').textContent)
+  };
+  console.log('[WPM] Email capture submission:', buildSummary);
+  // TODO: wire to real endpoint — e.g.:
+  // fetch('/api/captures',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildSummary)})
+  emailCaptured=true;
+  const rn=document.getElementById('custName'); const re=document.getElementById('custEmail');
+  if(rn&&!rn.value) rn.value=name; if(re&&!re.value) re.value=email;
+  document.getElementById('tyEmail').textContent=email;
+  document.getElementById('modalForm').style.display='none';
+  document.getElementById('modalThankyou').style.display='';
 };
 
 (async function bootstrap(){
