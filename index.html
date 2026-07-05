@@ -270,6 +270,11 @@ h4 { font-size: 1rem; }
     <div class="build-stage" id="stage3"><div class="stage-header"><h2>Battery &amp; Payload</h2><p>Power system, cargo drops, winches. You can combine multiple payload mechanisms.</p></div><div class="cat-label">Battery <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_batt"></div><div class="cat-label">Cargo / Payload Mechanisms <span class="sel-mode">Select multiple &mdash; mix and match</span></div><div class="option-grid" id="grid_cargo"></div><div class="cat-label" id="lbl_vtol" style="display:none">VTOL Conversion <span class="sel-mode">Select one</span></div><div class="option-grid" id="grid_vtol"></div></div>
     <div class="build-stage" id="stage4"><div class="stage-header"><h2>Accessories &amp; Ground Support</h2><p>Everything from launch systems to transport cases. Select as many as you need.</p></div><div class="cat-label">Launch &amp; Recovery <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_launch"></div><div class="cat-label">Transport &amp; Protection <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_transport"></div><div class="cat-label">Ground Station &amp; Range <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_ground"></div><div class="cat-label">Field Accessories <span class="sel-mode">Select multiple</span></div><div class="option-grid" id="grid_field"></div></div>
     <div class="build-stage" id="stage5"><div class="stage-header"><h2>Review Your Build</h2><p>Double-check everything. Hit "Send Order" and our team contacts you within 24 hours to arrange payment and schedule assembly.</p></div><table class="summary-table" id="summaryTable"><thead><tr><th>Component</th><th>Selection</th><th>Qty</th><th>Price</th></tr></thead><tbody id="summaryBody"></tbody></table><div style="margin:24px 0"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Name</label><input type="text" id="custName" placeholder="Your full name" style="width:100%;max-width:400px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px"></div><div style="margin-bottom:24px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Email</label><input type="email" id="custEmail" placeholder="you@example.com" style="width:100%;max-width:400px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px"></div><div style="margin-bottom:24px"><label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px">Notes (optional)</label><textarea id="custNotes" rows="3" placeholder="Special requests, paint color, mission details..." style="width:100%;max-width:400px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:14px;resize:vertical"></textarea></div></div>
+    <div style="margin-bottom:24px">
+      <button id="preview3dBtn" onclick="previewIn3D()" style="background:transparent;border:2px solid #f59e0b;color:#f59e0b;padding:12px 24px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;width:100%;max-width:400px">
+        Preview Your Drone in 3D →
+      </button>
+    </div>
     <div class="order-confirm" id="orderConfirm" style="display:none"><div style="font-size:48px;margin-bottom:12px">&#9993;</div><h2>Order Received</h2><p>Your custom build request has been sent to <strong>wpmsystems@gmail.com</strong>.</p><p style="margin-top:16px">A WPM Management Systems team member will contact you within <strong>24 hours</strong> to confirm specs, arrange payment, and schedule your build.</p><p style="margin-top:16px;font-size:12px;color:var(--text3)">No payment is taken until you speak with our team. Builds typically ship 2&ndash;4 weeks after payment.</p><button class="btn btn-primary" style="margin-top:24px" onclick="location.reload()">Start a New Build</button></div>
   </div>
   <div class="build-bar" id="buildBar">
@@ -615,6 +620,24 @@ window.sendOrder=function(){
   document.getElementById('buildBar').style.display='none';
   document.getElementById('progressBar').style.display='none';
   document.getElementById('orderConfirm').style.display='';
+};
+
+window.previewIn3D=function(){
+  const params=new URLSearchParams();
+  params.set('motors',motorN());
+  const c=afCompat()||'';
+  const m=c.match(/(\d+)/);
+  let frame=450;
+  if(m){const in2=parseInt(m[1]);const map={3:150,5:250,7:350,10:450,12:600,15:700,18:900};frame=map[in2]||Math.round(in2*25.4*2);}
+  else if(sel.fw) frame=680;
+  params.set('frame',frame);
+  const hasCam=(multi.cam||[]).some(x=>x.price>0);
+  const hasLidar=(multi.cargo||[]).some(x=>x.name&&/lidar/i.test(x.name));
+  if(hasLidar) params.set('payload','lidar');
+  else if(hasCam) params.set('payload','camera');
+  const name=(document.getElementById('custName')?.value?.trim())||'WPM Custom Build';
+  params.set('name',name);
+  window.open('drone-viewer.html?'+params.toString(),'_blank');
 };
 
 (async function bootstrap(){
